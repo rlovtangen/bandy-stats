@@ -285,12 +285,17 @@ async function main() {
     .sort((a, b) => b.points - a.points || b.goals - a.goals);
 
   const csvHeader = 'rank;personId;firstName;lastName;team;gamesPlayed;goals;assists;points;goalsPerGame;assistsPerGame;pointsPerGame\n';
+  let rank = 0;
   const csvRows = allPlayersSorted.map((p, index) => {
+    // Same rank for equal points (e.g. 1, 2, 2, 4)
+    if (index === 0 || p.points !== allPlayersSorted[index - 1].points) {
+      rank = index + 1;
+    }
     const gp = p.gamesPlayed || 0;
     const goalsPerGame  = gp > 0 ? (p.goals   / gp).toFixed(2) : '0.00';
     const assistsPerGame = gp > 0 ? (p.assists / gp).toFixed(2) : '0.00';
     const pointsPerGame  = gp > 0 ? (p.points  / gp).toFixed(2) : '0.00';
-    return `${index + 1};${p.personId};${p.firstName};${p.lastName};${p.team || ''};${gp};${p.goals};${p.assists};${p.points};${goalsPerGame};${assistsPerGame};${pointsPerGame}`;
+    return `${rank};${p.personId};${p.firstName};${p.lastName};${p.team || ''};${gp};${p.goals};${p.assists};${p.points};${goalsPerGame};${assistsPerGame};${pointsPerGame}`;
   }).join('\n');
 
   const csvContent = csvHeader + csvRows;
